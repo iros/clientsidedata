@@ -22,11 +22,11 @@ You should pop that open and try again.
 
 No. The following examples (sorted in order of slide progression) also have jsBins you can view:
 
-* [underscore-basics](http://jsbin.com/ofoyur/edit#javascript,html,live)
+* [underscore-basics](http://jsbin.com/ofoyur/3/edit)
 * [mvc-backbone](http://jsbin.com/ugedon/edit#javascript,html,live)
 * [mvc-canjs](http://jsbin.com/ayarad/edit#javascript,html,live)
 * [taffy-db](http://jsbin.com/ehakot/3/edit)
-* [crossfilter-basic](http://jsbin.com/iyabok/4/edit#javascript,html,live)
+* [crossfilter-basic](http://jsbin.com/iyabok/5/edit#javascript,html,live)
 * [crossfilter-nan](http://jsbin.com/ojuqoq/edit#javascript,html,live)
 * [miso-dataset-basics](http://jsbin.com/anodul/edit#javascript,html,live)
 * [miso-dataset-custom-type](http://jsbin.com/udikel/edit#javascript,html,live)
