@@ -29,7 +29,7 @@ No. The following examples (sorted in order of slide progression) also have jsBi
 * [crossfilter-basic](http://jsbin.com/iyabok/5/edit#javascript,html,live)
 * [crossfilter-nan](http://jsbin.com/ojuqoq/edit#javascript,html,live)
 * [miso-dataset-basics](http://jsbin.com/anodul/edit#javascript,html,live)
-* [miso-dataset-custom-type](http://jsbin.com/udikel/edit#javascript,html,live)
+* [miso-dataset-custom-type](http://jsbin.com/udikel/2/edit)
 * web-workers - Doesn't have a jsBin.
 * [json-streams](http://jsbin.com/ijitam/edit#javascript,html,live)
 
