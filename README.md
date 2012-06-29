@@ -33,6 +33,10 @@ No. The following examples (sorted in order of slide progression) also have jsBi
 * web-workers - Doesn't have a jsBin.
 * [json-streams](http://jsbin.com/ijitam/edit#javascript,html,live)
 
+# Is this production level code?
+
+Hah! Funny. Nope. I didn't architect any proper apps here. Use these code samples as guides, but please get to know the libraries well enough to judge them yourself before you use them.
+
 # I have questions you haven't answered here
 
 Great. Ping me at @ireneros on twitter or irene at bocoup.com.
