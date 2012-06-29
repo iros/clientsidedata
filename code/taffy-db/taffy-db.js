@@ -2,7 +2,7 @@
 $.get('../../data/heroes.json', function(heroes) {
 
   // create a database of heroes
-  var heroes = TAFFY(heroes);
+  heroes = TAFFY(heroes);
 
   // find all the male & female heroes
   var male_heroes = heroes({ 
@@ -15,11 +15,13 @@ $.get('../../data/heroes.json', function(heroes) {
     type : "hero",  
     Height_cm : { "!is" : "NA" } 
   }),
+  // find all heroes that are not male and are not female
   unknown_gender_heroes = heroes({
-    Gender : ({ "!is" : "male "}, {"!is" : "female"}),
     type : "hero",  
     Height_cm : { "!is" : "NA" } 
-  });
+    }, [{ Gender : { "!is" : "male" }}, 
+        { Gender : { "!is" : "female" }}]
+  );
 
   console.log("Number of heroes that are male: ", male_heroes.count());
   console.log("Number of heroes that are female: ", female_heroes.count());

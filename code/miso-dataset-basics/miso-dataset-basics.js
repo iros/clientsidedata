@@ -6,7 +6,7 @@ var heroes = new Miso.Dataset({
 
 // fetch data
 heroes.fetch().then(function() {
-   
+
   // === Products
   console.log("intelligence", 
     "min", heroes.min("intelligence"), 

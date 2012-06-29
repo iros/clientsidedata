@@ -33,7 +33,7 @@ function XHRStream(xhr) {
     // bind to state change to hook into readyState 3
     xhr.onreadystatechange = function() {
         self.handleReadyStateChange();
-    }
+    };
 
     xhr.send(null);
 }

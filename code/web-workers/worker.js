@@ -1,6 +1,11 @@
 // we are going to use underscore here.
 importScripts("http://underscorejs.org/underscore-min.js");
 
+// when we are done with the worker, post back the result.
+function done(res){
+  postMessage({ status : "done", value : res.val, url : res.url });
+}
+
 // attach an on message handler. This is how we actually kick off
 // this worker, by sending it a start message. It also expects
 // a url to retrieve.
@@ -12,7 +17,7 @@ onmessage = function(e){
     // an xhr ready state 
     var handleHeroes = function() {
 
-      if(this.readyState == this.DONE && this.status == 200) {
+      if(this.readyState === this.DONE && this.status === 200) {
 
         // parse incoming text back into json
         var heroes = JSON.parse(this.responseText);
@@ -44,7 +49,3 @@ onmessage = function(e){
   }
 };
 
-// when we are done with the worker, post back the result.
-function done(res){
-  postMessage({ status : "done", value : res.val, url : res.url });
-}

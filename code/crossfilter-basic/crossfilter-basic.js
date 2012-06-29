@@ -3,7 +3,7 @@ d3.json("../../data/heroes.json", function(heroes) {
 
   // before we pass heroes out to crossfilter, remove those that don't
   // have an intelligence property.
-  heroes_with_intelligence = _.filter(heroes, function(hero) {
+  var heroes_with_intelligence = _.filter(heroes, function(hero) {
     return (typeof hero.intelligence !== "undefined" && 
            !_.isNaN(hero.intelligence));
   });

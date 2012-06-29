@@ -31,15 +31,17 @@ $.get('../../data/heroes.json', function(heroes) {
   // compute the mean height
   _.mixin({
     sum : function(obj, key) {
+      var arr;
+      key = key || 'value';
       if (_.isArray(obj) && typeof obj[0] === 'number') {
-        var arr = obj;
+        arr = obj;
       } else {
-        var key = key || 'value';
-        var arr = _(obj).pluck(key);
+        arr = _(obj).pluck(key);
       }
       var val = 0;
-      for (var i=0, len = arr.length; i<len; i++)
+      for (var i=0, len = arr.length; i<len; i++) {
         val += arr[i];
+      }
       return val;
     },
 

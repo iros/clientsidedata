@@ -14,7 +14,7 @@ var handle_data = function(e) {
       text : e.data.url + ": " + e.data.value
     }).appendTo($('#heroes'));  
   }
-}
+};
 
 // Setup both workers to use the above handler as their
 // on message handler.

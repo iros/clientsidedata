@@ -8,7 +8,7 @@ Miso.types.moneyWithCommas = {
   // fits within the scope of this type.
   // return true if value is of this type. False otherwise.
   test : function(value) {
-     return /(^\d{1,3}([\,]?\d{3})*(\.\d{1,2})?$)/.test(value);
+     return (/(^\d{1,3}([\,]?\d{3})*(\.\d{1,2})?$)/).test(value);
   },
 
   // provide a way to compare two values. This will be used by

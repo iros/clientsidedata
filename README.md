@@ -25,7 +25,7 @@ No. The following examples (sorted in order of slide progression) also have jsBi
 * [underscore-basics](http://jsbin.com/ofoyur/edit#javascript,html,live)
 * [mvc-backbone](http://jsbin.com/ugedon/edit#javascript,html,live)
 * [mvc-canjs](http://jsbin.com/ayarad/edit#javascript,html,live)
-* [taffy-db](http://jsbin.com/ehakot/edit#javascript,html,live)
+* [taffy-db](http://jsbin.com/ehakot/3/edit)
 * [crossfilter-basic](http://jsbin.com/iyabok/4/edit#javascript,html,live)
 * [crossfilter-nan](http://jsbin.com/ojuqoq/edit#javascript,html,live)
 * [miso-dataset-basics](http://jsbin.com/anodul/edit#javascript,html,live)
