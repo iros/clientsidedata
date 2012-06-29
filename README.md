@@ -20,7 +20,7 @@ You should pop that open and try again.
 
 # Do I have to run this code?
 
-No. The following examples also have jsBins you can view:
+No. The following examples (sorted in order of slide progression) also have jsBins you can view:
 
 * [underscore-basics](http://jsbin.com/ofoyur/edit#javascript,html,live)
 * [mvc-backbone](http://jsbin.com/ugedon/edit#javascript,html,live)
@@ -36,4 +36,4 @@ No. The following examples also have jsBins you can view:
 # I have questions you haven't answered here
 
 Great. Ping me at @ireneros on twitter or irene at bocoup.com.
-I also idle in may places on irc: #bocoup, #misoproject.
+I also idle in many places on irc: #bocoup, #misoproject.
