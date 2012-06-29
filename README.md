@@ -13,6 +13,11 @@ This repo contains:
 From the root of the repo run your favorite basic http server.
 I'm a fan of `python -m SimpleHTTPServer`.
 
+# I Don't see anything
+
+That's because some of the output is in the console. 
+You should pop that open and try again.
+
 # Do I have to run this code?
 
 No. The following examples also have jsBins you can view:
@@ -28,7 +33,7 @@ No. The following examples also have jsBins you can view:
 * web-workers - Doesn't have a jsBin.
 * [json-streams](http://jsbin.com/ijitam/edit#javascript,html,live)
 
-# I have questions
+# I have questions you haven't answered here
 
 Great. Ping me at @ireneros on twitter or irene at bocoup.com.
 I also idle in may places on irc: #bocoup, #misoproject.
