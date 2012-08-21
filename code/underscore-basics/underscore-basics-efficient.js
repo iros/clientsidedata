@@ -1,5 +1,5 @@
 // fetch our hero json file...
-$.get('../../data/heroes.json', function(heroes) {
+$.get('../../data/all.json', function(heroes) {
 
   // === modify each record:
   // add a property called hasHeight to each object that marks whether it

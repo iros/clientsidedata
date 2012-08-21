@@ -1,5 +1,5 @@
 // fetch our hero json file...
-$.get('../../data/heroes.json', function(heroes) {
+$.get('../../data/all.json', function(heroes) {
 
   // create a database of heroes
   heroes = TAFFY(heroes);

@@ -6,7 +6,7 @@
   var Heroes = can.Model({
       // To fetch all models, define the findAll fetch method 'GET'
       // and the URL we are going against.
-      findAll: 'GET ../../data/heroes.json'
+      findAll: 'GET ../../data/all.json'
   }, {});
 
 

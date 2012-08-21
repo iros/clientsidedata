@@ -1,7 +1,7 @@
 // Instantiate a new Miso Dataset object and point it
 // at our trusty hero database.
 var heroes = new Miso.Dataset({
-   url: '../../data/heroes.json'
+   url: '../../data/all.json'
 });
 
 // fetch data
