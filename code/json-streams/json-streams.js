@@ -77,7 +77,7 @@ XHRStream.prototype.write = function() {
 
 // Create a new XHR Request and fetch a large json file.
 var xhr = new XMLHttpRequest();
-xhr.open("GET", "../../data/heroes.json", true);
+xhr.open("GET", "../../data/all.json", true);
 
 // create a new XHRStream object
 var xhrstream = new XHRStream(xhr);

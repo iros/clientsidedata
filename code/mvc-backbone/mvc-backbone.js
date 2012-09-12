@@ -6,7 +6,7 @@
     // and create a model for each available hero
         Heroes = Backbone.Collection.extend({
             model : Hero,
-            url: '../../data/heroes.json'
+            url: '../../data/all.json'
         }),
         
     // Define a basic view for a hero model - just an li element

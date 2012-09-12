@@ -1,5 +1,5 @@
 // fetch our json file... this time with d3 just for fun.
-d3.json("../../data/heroes.json", function(heroes) {
+d3.json("../../data/all.json", function(heroes) {
 
   // before we pass heroes out to crossfilter, remove those that don't
   // have an intelligence property.

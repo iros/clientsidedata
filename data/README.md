@@ -5,11 +5,12 @@ This is data about super heroes and villains. It's that simple.
 
 ## Files
 
-* heroes.json
-  This file actually contains both heroes AND villains. All the code examples
-  were written using this file, so I kept it this way.
+* all.json
+  This file contains both heroes AND villains. All the code examples
+  were written using this file. It was previously named heroes.json just
+  to be confusing :P
 
-* heroes.csv
+* all.csv
   Same as above, just csv.
 
 * just_heroes.json
@@ -20,7 +21,7 @@ This is data about super heroes and villains. It's that simple.
 
 ## Where did it come from?
 
-It was scraped from the web. Ask me for more details offline if you must.
+It was scraped from the web. Ask me for more details offline if you want.
 
 ## Schema
 
