@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Taffy-db</title>
+  <meta name="author" content="Irene Ros">
+  <!-- Date: 2012-06-29 -->
+  <style>
+    #scatterplot {
+      margin-top: 20px;
+    }
+    .axis text {
+      font-size: 0.7em;
+    }
+  </style>
+</head>
+<body>
+  <div id="heroes">
+    <h2>What's the relationship between abilities?</h2>
+    <b>Type:</b>
+    
+    <select id="type">
+      <option value="both" selected>Both</option>
+      <option value="hero">Hero</option>
+      <option value="villain">Villain</option>
+    </select>
+
+    <b>X Axis:</b>
+    <select id="xSelect">
+      <option value="combat" selected>combat</option>
+      <option value="power">power</option>
+      <option value="intelligence">intelligence</option>
+      <option value="durability">durability</option>
+      <option value="speed">speed</option>
+    </select>
+    <b>Y Axis:</b>
+    <select id="ySelect">
+      <option value="combat">combat</option>
+      <option value="power" selected>power</option>
+      <option value="intelligence">intelligence</option>
+      <option value="durability">durability</option>
+      <option value="speed">speed</option>
+    </select>
+    <b>Gender:</b>
+    <select id="gender">
+      <option value="both" selected>Both</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+      <option value="clear">Clear Distinction</option>
+    </select>
+    <div id="scatterplot">
+
+    </div>
+  </div>​
+  <script type="text/javascript" src="../../libs/jquery.min.js"></script>
+  <script type="text/javascript" src="../../libs/d3.v2.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.js"></script>
+  <script type="text/javascript" src="../../libs/taffy-db.js"></script>
+  <script type="text/javascript" src="taffy-db2.js"></script>
+  </body>
+</html>
+
+
+
