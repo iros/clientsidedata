@@ -1,0 +1,69 @@
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Crossfilter Visual</title>
+  <meta name="author" content="Irene Ros">
+  <style>
+    .sparline-container {
+      width: 300px;
+      position: relative;
+      margin-bottom: 10px;
+      padding-top: 10px;
+      padding-bottom: 20px;
+      border-top: 1px solid #666;
+      border-bottom: 1px solid #aaa;
+
+    }
+    .competency {
+      width: 290px;
+      padding-left: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      background-color: #eaeaea;
+    }
+    .sparkline {
+      width: 200px;
+      height: 70px;
+      margin: auto;
+    }
+    .min, .max {
+      font-size: 0.8em;
+      bottom: 10;
+      position: absolute;
+      display: inline-block;
+    }
+    .min {
+      left: 0;
+    }
+    .max {
+      right: 0;
+    }
+  </style>
+
+
+</head>
+<body>
+  <div id="sparklines">
+
+  </div>
+  <script type="text/javascript" src="../../libs/jquery.min.js"></script>
+  <script type="text/javascript" src="../../libs/jquery.sparklines.js"></script>
+  <script type="text/javascript" src="../../libs/d3.v2.js"></script>
+  <script type="text/javascript" src="../../libs/crossfilter.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.js"></script>
+  <script type="text/javascript" src="crossfilter-visual.js"></script>
+
+  <script type="text/template" id="sparkline_template">
+    <div class="competency"><%= competency %></div>
+    <div class="sparline-container">
+      <div class="min"><%= min %></div>
+      <div class="sparkline"></div>
+      <div class="max"><%= max %></div>
+    </div>
+  </script>
+
+  </body>
+</html>
+
+
+

@@ -5,7 +5,7 @@ $.get('../../data/all.json', function(heroes) {
   heroes = TAFFY(heroes);
  
   // find all heroes that have all their ability scores.
-  var gendered_heroes = heroes({
+  var heroes_with_competencies = heroes({
       combat : { isUndefined : false },
       power :  { isUndefined : false },
       durability :  { isUndefined : false },
@@ -27,15 +27,15 @@ $.get('../../data/all.json', function(heroes) {
 
   var heightRange = d3.scale.linear()
     .domain([
-      gendered_heroes.min(y_attr), 
-      gendered_heroes.max(y_attr)
+      heroes_with_competencies.min(y_attr), 
+      heroes_with_competencies.max(y_attr)
     ])
     .range([height - 16 - r,0 + r]);
 
   var widthRange = d3.scale.linear()
     .domain([
-      gendered_heroes.min(x_attr),
-      gendered_heroes.max(x_attr)
+      heroes_with_competencies.min(x_attr),
+      heroes_with_competencies.max(x_attr)
     ])
     .range([24, width-r]);
 
@@ -67,7 +67,7 @@ $.get('../../data/all.json', function(heroes) {
   var dots = chart.append("g")
     .attr("class", "dots")
     .selectAll("circle")
-    .data(gendered_heroes.get())
+    .data(heroes_with_competencies.get())
     .enter()
       .append("circle")
       .attr("type", function(d) {
@@ -105,8 +105,8 @@ $.get('../../data/all.json', function(heroes) {
     x_attr = $(e.target).val();
 
     widthRange.domain([
-      gendered_heroes.min(x_attr),
-      gendered_heroes.max(x_attr)
+      heroes_with_competencies.min(x_attr),
+      heroes_with_competencies.max(x_attr)
     ]);
 
     // reset our x&y values (mostly for debugging)
@@ -129,8 +129,8 @@ $.get('../../data/all.json', function(heroes) {
     y_attr = $(e.target).val();
 
     heightRange.domain([
-      gendered_heroes.min(y_attr),
-      gendered_heroes.max(y_attr)
+      heroes_with_competencies.min(y_attr),
+      heroes_with_competencies.max(y_attr)
     ]);
 
     // reset our x&y values (mostly for debugging)
