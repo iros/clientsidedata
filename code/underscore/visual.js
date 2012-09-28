@@ -75,7 +75,7 @@ $.when(heroesDef, villainsDef).then(function() {
         .attr("font-size", 25)
         .attr("text-anchor", "middle")
         .attr("fill", "#fff")
-        .text(function(d) { return Math.round(d); })
+        .text(function(d) { return Math.round(d); });
   
 });
 

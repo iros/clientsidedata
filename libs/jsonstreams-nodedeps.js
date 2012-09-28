@@ -1,12 +1,12 @@
 var require = function (file, cwd) {
     var resolved = require.resolve(file, cwd || '/');
     var mod = require.modules[resolved];
-    if (!mod) throw new Error(
-        'Failed to resolve module ' + file + ', tried ' + resolved
-    );
+    if (!mod) { 
+      throw 'Failed to resolve module ' + file + ', tried ' + resolved;
+    }
     var res = mod._cached ? mod._cached : mod();
     return res;
-}
+};
 
 require.paths = [];
 require.modules = {};

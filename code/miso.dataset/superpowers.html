@@ -1,0 +1,156 @@
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Miso Dataset Most Used Superpowers</title>
+  <meta name="author" content="Irene Ros">
+  <style>
+    body {
+      font-family: 'Helvetica', 'sans-serif';
+    }
+    .count { 
+      font-weight: bold;
+      font-size: 3em;
+      float: left;
+    }
+    .tiny {
+      font-size: 0.7em;
+      margin-top: 10px;
+    }
+    h2.count {
+      margin : 0;
+      padding: 0;
+      padding-right: 15px;
+    }
+    span.caption {
+      margin-top: 8px;
+      display: inline-block;
+    }
+    #allSuperpowers, #perHero, #howMany {
+      display: inline-block;
+      float: left;
+      margin-right: 10px;
+    }
+    #allSuperpowers ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #howMany {
+      margin-right: 40px;
+      text-align: center;
+    }
+    #howMany .count {
+      float: none;
+      margin-top: -7;
+      font-size: 5.5em;
+    }
+    #howMany .caption {
+      font-size: 1.5em;
+      text-align: right;
+    }
+    #perHero {
+      margin-right: 40px;
+    }
+    #perHero .count {
+      margin-top: -7;
+      font-size: 5.5em;
+    }
+    .scount {
+      color: #aaa;
+      font-size: 0.7em;
+    }
+    .sp {
+      width: 300px;
+      position: relative;
+      margin-bottom: 10px;
+      padding-top: 10px;
+      padding-bottom: 20px;
+      border-top: 1px solid #666;
+      border-bottom: 1px solid #aaa;
+      margin-top: 20px;
+    }
+    .sp .sparkline-container {
+      width: 240px;
+      height: 70px;
+      margin: auto;
+    }
+    .sparkline-container .min, .sparkline-container .max {
+      font-size: 0.8em;
+      bottom: 10;
+      position: absolute;
+      display: inline-block;
+    }
+    .sparkline-container .min {
+      left: 0;
+    }
+    .sparkline-container .max {
+      right: 0;
+    }
+  </style>
+</head>
+<body>
+  <h3>Super Power Stats</h3>
+
+  <div id="howMany">
+    <h2 class="count">
+      ?
+    </h2>
+    <span class="caption">Types of <br />Super Powers</span>
+  </div>
+
+  <div id="perHero">
+    <h2 class="count">
+      ?
+    </h2>
+    <span class="caption">Super powers per <br />hero on average</span>
+    <br />
+    <div class="tiny">
+    With a maximum of <span class="max"></span>, and a 
+    minimum of <span class="min"></span>.</div>
+    <div class="sp">
+
+    </div>
+  </div>
+
+  <div id="allSuperpowers">
+    <h3>Top 10: </h3>
+    <ul class="topList">
+    </ul>
+  </br>
+    <h3>Bottom 10: </h3>
+    <ul class="bottomList">
+    </ul>
+  </div>
+
+  <!-- resources -->
+  <script type="text/javascript" src="../../libs/jquery.min.js"></script>
+  <script type="text/javascript" src="../../libs/lodash.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.deferred.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.math.js"></script>
+  <script type="text/javascript" src="../../libs/moment.js"></script>
+  <script type="text/javascript" src="../../libs/jquery.sparklines.js"></script>
+  <script type="text/javascript" src="../../libs/d3.v2.js"></script>
+  <script type="text/javascript" src="../../libs/miso.ds.js"></script>
+  <script type="text/javascript" src="superpowers_helper.js"></script>
+  <script type="text/javascript" src="superpowers.js"></script>
+
+  <script type="text/template" id="sparkline_template">
+    <div class="sparkline-container">
+      <div class="min"><%= min %></div>
+      <div class="chart"></div>
+      <div class="max"><%= max %></div>
+    </div>
+  </script>
+  <script type="text/template" id="superpowerStat">
+    <li>
+      <span class="hsparkline"></span> <span class="vsparkline"></span>
+      <span class="power">
+        <%= /superpower_(.*)/.exec(s.power)[1].replace(/_/g, " ") %>
+      </span>
+      <span class="scount">(<%= s.count %>)</span>
+      
+    </li>
+  </script>
+
+  </body>
+</html>

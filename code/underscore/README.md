@@ -4,4 +4,4 @@
 
 2. [visual.html](visual.html) - A visual comparison of the mean of villains vs heroes.
 
-3. [efficient.html](efficient.js) - A slightly more efficient way to compute the mean of heights.
+3. [efficient.html](efficient.html) - A slightly more efficient way to compute the mean of heights.

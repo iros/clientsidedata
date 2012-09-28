@@ -77,7 +77,7 @@ d3.json("../../data/all.json", function(heroes) {
     // The key will be the grouping function result, the value
     // by default will be count. we can always return something else.
     results[competency].scores = [];
-    for (var i = 0; i < intervals; i++) {
+    for (i = 0; i < intervals; i++) {
       var val = competency_groups[i].value;
       if (val < global_min) {
         global_min = val;

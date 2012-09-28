@@ -7,12 +7,8 @@ var heroes = new Miso.Dataset({
 // fetch data
 heroes.fetch().then(function() {
 
-  // === Products
-  console.log("intelligence", 
-    "min", heroes.min("intelligence"), 
-    "max", heroes.max("intelligence"));
-
-  // === derivatives + sorting
+  // Get all the hair color counts
+  // and then sort them by the actual resulting count.
   var heroes_by_haircolor = heroes.countBy("Hair_color")
     .sort(function(row1, row2) {
       if (row1.count > row2.count) { return -1; }
@@ -20,12 +16,13 @@ heroes.fetch().then(function() {
       return 0;
     });
 
-  // ==== output colors 
+  // ==== output top 10 colors as a basic list.
   var list = $('ul#heroHairColor').empty();
   for(var i = 0; i < 10; i++) {
     var row = heroes_by_haircolor.rowByPosition(i);
     $('<li>', { 
-      text : row.Hair_color + "(" + row.count + ")"
-    }).appendTo(list);
+      text : row.Hair_color + " (" + row.count + ")"
+    })
+    .appendTo(list);
   }
 });

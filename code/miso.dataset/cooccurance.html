@@ -1,0 +1,41 @@
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Miso Dataset Co Occurance</title>
+  <meta name="author" content="Irene Ros">
+  <link rel="stylesheet" type="text/css" href="http://bost.ocks.org/mike/style.css?20120427">
+  <style>
+  svg {
+    font: 7px sans-serif;
+  }
+  text.active {
+    fill : red;
+  }
+  .background {
+    fill : #eee;
+  }
+  line {
+    stroke : white;
+  }
+  </style>
+
+  <!-- Date: 2012-06-29 -->
+</head>
+<body>
+  <select id="order">
+  <option value="name">by Name</option>
+  <option value="count">by Frequency</option>
+  <option value="group">by Cluster</option>
+</select>
+
+  <!-- resources -->
+  <script type="text/javascript" src="../../libs/jquery.min.js"></script>
+  <script type="text/javascript" src="../../libs/lodash.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.deferred.js"></script>
+  <script type="text/javascript" src="../../libs/underscore.math.js"></script>
+  <script type="text/javascript" src="../../libs/moment.js"></script>
+  <script type="text/javascript" src="../../libs/miso.ds.js"></script>
+  <script type="text/javascript" src="../../libs/d3.v2.js"></script>
+  <script type="text/javascript" src="cooccurance.js"></script>
+  </body>
+</html>

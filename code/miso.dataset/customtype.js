@@ -1,5 +1,5 @@
 // all types live under the Miso.types namespace.
-Miso.types.moneyWithCommas = {
+Miso.Dataset.types.moneyWithCommas = {
 
   // provide a name for your type.
   name : 'moneyWithCommas',
@@ -53,5 +53,5 @@ var ds = new Miso.Dataset({
 });
 
 ds.fetch().then(function() {
-    console.log(ds.column("a").data);
+  console.log(ds.column("a").data);
 });

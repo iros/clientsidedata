@@ -97,7 +97,7 @@ $.get('../../data/all.json', function(heroes) {
           return "blue";
         }
       })
-      .attr("r", r)
+      .attr("r", r);
 
   // attach to dropdowns:
   // x axis dropdown
@@ -120,7 +120,7 @@ $.get('../../data/all.json', function(heroes) {
     dots.transition()
       .attr("cx", function(d) {
         return widthRange(d[x_attr]);
-      })
+      });
   });
 
    // attach to dropdowns
@@ -144,7 +144,7 @@ $.get('../../data/all.json', function(heroes) {
     dots.transition()
       .attr("cy", function(d) {
         return heightRange(d[y_attr]);
-      })
+      });
   });
 
   // hero type
@@ -172,7 +172,7 @@ $.get('../../data/all.json', function(heroes) {
         } else {
           return "blue";
         }
-      })
+      });
     } else if (s === "female") {
       $('circle').hide();
       $('circle[gender="female"]').show();
@@ -192,5 +192,5 @@ $.get('../../data/all.json', function(heroes) {
         .transition()
         .attr("fill", "#000");
     }
-  })
+  });
 });

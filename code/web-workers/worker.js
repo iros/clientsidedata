@@ -1,5 +1,5 @@
 // we are going to use underscore here.
-importScripts("http://underscorejs.org/underscore-min.js");
+importScripts("../../libs/underscore.js");
 
 // when we are done with the worker, post back the result.
 function done(res){
