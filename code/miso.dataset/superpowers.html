@@ -3,6 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Miso Dataset Most Used Superpowers</title>
   <meta name="author" content="Irene Ros">
+  <link rel="stylesheet" type="text/css" href="../../assets/base.css">
   <style>
     body {
       font-family: 'Helvetica', 'sans-serif';
@@ -25,35 +26,26 @@
       margin-top: 8px;
       display: inline-block;
     }
+    hr {
+      margin: 10px 0 10px;
+    }
     #allSuperpowers, #perHero, #howMany {
       display: inline-block;
-      float: left;
-      margin-right: 10px;
     }
     #allSuperpowers ul {
       list-style-type: none;
       margin: 0;
       padding: 0;
     }
-    #howMany {
-      margin-right: 40px;
-      text-align: center;
-    }
     #howMany .count {
-      float: none;
-      margin-top: -7;
-      font-size: 5.5em;
+      margin-top: -7px;
     }
+    
     #howMany .caption {
-      font-size: 1.5em;
-      text-align: right;
+      display:inline;
     }
     #perHero {
-      margin-right: 40px;
-    }
-    #perHero .count {
-      margin-top: -7;
-      font-size: 5.5em;
+      /*margin-right: 40px;*/
     }
     .scount {
       color: #aaa;
@@ -74,6 +66,9 @@
       height: 70px;
       margin: auto;
     }
+    li .power {
+      font-size: 10px;
+    }
     .sparkline-container .min, .sparkline-container .max {
       font-size: 0.8em;
       bottom: 10;
@@ -89,37 +84,52 @@
   </style>
 </head>
 <body>
-  <h3>Super Power Stats</h3>
-
-  <div id="howMany">
-    <h2 class="count">
-      ?
-    </h2>
-    <span class="caption">Types of <br />Super Powers</span>
-  </div>
-
-  <div id="perHero">
-    <h2 class="count">
-      ?
-    </h2>
-    <span class="caption">Super powers per <br />hero on average</span>
-    <br />
-    <div class="tiny">
-    With a maximum of <span class="max"></span>, and a 
-    minimum of <span class="min"></span>.</div>
-    <div class="sp">
-
+  <div class="container">
+    <!-- header -->
+    <div class="twelve columns omega">
+      <h1>Super Power Stats</h1>
     </div>
-  </div>
+    <div class="twelve columns omega">
+      
+      <div class="six columns alpha">
+        <div id="howMany">
+          <h2 class="count">
+            ?
+          </h2>
+          <div class="caption">Types of Super Powers</div>
+        </div>
+        <hr>
+        <div id="perHero">
+          <h2 class="count">
+            ?
+          </h2>
+          <span class="caption">Super powers per <br />hero on average</span>
+          
+          <div class="tiny">
+          With a maximum of <span class="max"></span>, and a 
+          minimum of <span class="min"></span>.</div>
+          <hr>
+          <div class="sp">
 
-  <div id="allSuperpowers">
-    <h3>Top 10: </h3>
-    <ul class="topList">
-    </ul>
-  </br>
-    <h3>Bottom 10: </h3>
-    <ul class="bottomList">
-    </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="six columns omega">
+        <div id="allSuperpowers">
+          <div class="three columns alpha">
+            <h3>Top 10: </h3>
+            <ul class="topList">
+            </ul>
+          </div>
+          <div class="three columns omega">
+            <h3>Bottom 10: </h3>
+            <ul class="bottomList">
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- resources -->
