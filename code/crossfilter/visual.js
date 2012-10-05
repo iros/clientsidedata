@@ -4,7 +4,7 @@ d3.json("../../data/all.json", function(heroes) {
   // before we pass heroes out to crossfilter, remove those that don't
   // have all competency properties because otherwise we will run into lots of zeroes
   // that weren't meant to be there..
-  var competencies = ["intelligence", "combat", "power", "durability", "speed"], 
+  var competencies = ["intelligence", "combat", "power", "durability", "speed", "strength"], 
       competent_heroes = _.filter(heroes, function(hero) {
         
         // get an array of booleans as to whether the particular

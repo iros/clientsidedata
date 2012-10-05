@@ -10,7 +10,8 @@ $.get('../../data/all.json', function(heroes) {
       power :  { isUndefined : false },
       durability :  { isUndefined : false },
       intelligence : { isUndefined : false },
-      speed :  { isUndefined : false }
+      speed :  { isUndefined : false },
+      strength : { isUndefined : false }
   });
 
   // build scatterplot!
