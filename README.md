@@ -1,7 +1,7 @@
 Building Client-Side Data-driven applications - Talk Materials
 =====================
 
-This repo is ever evloving in an attempt to capture the various client-side data manipulation and management libraries out there. This is a topic close to my heart and thus one that I love to tell others about as well.
+This repo is ever evolving in an attempt to capture the various client-side data manipulation and management libraries out there. This is a topic close to my heart and thus one that I love to tell others about as well.
 
 # Contents
 
