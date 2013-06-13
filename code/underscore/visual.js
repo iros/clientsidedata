@@ -52,31 +52,66 @@ $.when(heroesDef, villainsDef).then(function() {
       villain_heights = _.pluck(villains_with_height, "Height_cm");
   
   // === Make some circles...
-  var data = [_.mean(hero_heights), _.mean(villain_heights)];
-  var chart = d3.select("#heroes")
+  var data = [{ name : "heroes", value : _.mean(hero_heights) }, {
+    name : "villains", value: _.mean(villain_heights) }];
+
+  function makeCircles(elm, data) {
+    var width = 600, height = 300;
+    var posScale = d3.scale.linear()
+      .range([width/(data.length+1), width - width/(data.length+1)])
+      .domain([0,data.length-1]);
+
+    var chart = d3.select(elm)
       .text("")
-      .style({ width : "400px", height : "700px" })
+      .style({ width : width, height : height })
       .append("svg");
       
       chart.selectAll("circle")
       .data(data).enter()
         .append("circle")
         .style("fill", "steelblue")
-        .attr("cx", function(d, i) { return (400 / (i+1)) - d/3; })
-        .attr("cy", 150 )
-        .attr("r", function(d) { return Math.sqrt(d/Math.PI) * 9; });
+        .attr("cx", function(d, i) { 
+          return posScale(i);
+        })
+        .attr("cy", height / 2 )
+        .attr("r", function(d) { 
+          return Math.sqrt(d.value/Math.PI) * 6; 
+        });
 
       // append value
       chart.selectAll("text")
       .data(data).enter()
         .append("text")
-        .attr("x", function(d, i) { return (400 / (i+1)) - d/3; })
-        .attr("y", 150)
-        .attr("font-size", 25)
+        .attr("x", function(d, i) { 
+          return posScale(i);
+        })
+        .attr("y", height / 2)
+        .attr("font-size", 14)
         .attr("text-anchor", "middle")
         .attr("fill", "#fff")
-        .text(function(d) { return Math.round(d); });
+        .text(function(d) { return d.name + ": " + Math.round(d.value); });
+  }
   
+  makeCircles("#heroes", data);
+  
+  // same for gender!
+  var male_heroes = _.chain(heroes).filter(function(hero) {
+    return hero.Gender === 'male' && hero.Height_cm !== "NA";
+  }).pluck("Height_cm").value(),
+  female_heroes = _.chain(heroes).filter(function(hero) {
+    return hero.Gender === 'female' && hero.Height_cm !== "NA";
+  }).pluck("Height_cm").value(),
+  unknown = _.chain(heroes).filter(function(hero) {
+    return hero.Gender === 'female' && hero.Height_cm !== "NA";
+  }).pluck("Height_cm").value();
+
+  data = [
+    { name : "male" , value : _.mean(male_heroes)}, 
+    { name : "female" , value : _.mean(female_heroes)}, 
+    { name : "?" , value : _.mean(unknown)}
+  ];
+  
+  makeCircles("#heroes2", data);
 });
 
  

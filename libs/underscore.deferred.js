@@ -174,8 +174,10 @@
             (function add( args ) {
               _each( args, function( arg ) {
                 var type = _type( arg );
-                if ( type === "function" && ( !options.unique || !self.has( arg ) ) ) {
-                  list.push( arg );
+                if ( type === "function" ) {
+                  if ( !options.unique || !self.has( arg ) ) {
+                    list.push( arg );
+                  }
                 } else if ( arg && arg.length && type !== "string" ) {
                   // Inspect recursively
                   add( arg );
@@ -292,33 +294,46 @@
         },
         then: function( /* fnDone, fnFail, fnProgress */ ) {
           var fns = arguments;
+
           return _d.Deferred(function( newDefer ) {
+
             _each( tuples, function( tuple, i ) {
               var action = tuple[ 0 ],
                 fn = fns[ i ];
+
               // deferred[ done | fail | progress ] for forwarding actions to newDefer
               deferred[ tuple[1] ]( _isFunction( fn ) ?
+
                 function() {
-                  var returned = fn.apply( this, arguments );
+                  var returned;
+                  try { returned = fn.apply( this, arguments ); } catch(e){
+                    newDefer.reject(e);
+                    return;
+                  }
+
                   if ( returned && _isFunction( returned.promise ) ) {
                     returned.promise()
                       .done( newDefer.resolve )
                       .fail( newDefer.reject )
                       .progress( newDefer.notify );
                   } else {
-                    newDefer[ action + "With" ]( this === deferred ? newDefer : this, [ returned ] );
+                    newDefer[ action !== "notify" ? 'resolveWith' : action + 'With']( this === deferred ? newDefer : this, [ returned ] );
                   }
                 } :
+
                 newDefer[ action ]
               );
             });
+
             fns = null;
+
           }).promise();
+
         },
         // Get a promise for this deferred
         // If obj is provided, the promise aspect is added to the object
         promise: function( obj ) {
-          return typeof obj === "object" ? _extend( obj, promise ) : promise;
+          return obj != null ? _extend( obj, promise ) : promise;
         }
       },
       deferred = {};
@@ -361,14 +376,19 @@
     return deferred;
   };
 
-    // Deferred helper
-    _d.when = function( subordinate /* , ..., subordinateN */ ) {
+  // Deferred helper
+  _d.when = function( subordinate /* , ..., subordinateN */ ) { 
+
     var i = 0,
-      resolveValues = slice.call( arguments ),
-      length = resolveValues.length,
+      resolveValues = ( _type(subordinate) === 'array' && arguments.length === 1 ) ? subordinate : slice.call( arguments ),
+      length = resolveValues.length;
+
+      if ( _type(subordinate) === 'array' && subordinate.length === 1 ) {
+        subordinate = subordinate[ 0 ];
+      }
 
       // the count of uncompleted subordinates
-      remaining = length !== 1 || ( subordinate && _isFunction( subordinate.promise ) ) ? length : 0,
+      var remaining = length !== 1 || ( subordinate && _isFunction( subordinate.promise ) ) ? length : 0,
 
       // the master Deferred. If resolveValues consist of only a single Deferred, just use that.
       deferred = remaining === 1 ? subordinate : _d.Deferred(),

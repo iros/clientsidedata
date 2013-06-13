@@ -1,21 +1,18 @@
 /**
-* Miso.Dataset - v0.2.2 - 9/27/2012
+* Miso.Dataset - v0.4.1 - 3/13/2013
 * http://github.com/misoproject/dataset
-* Copyright (c) 2012 Alex Graul, Irene Ros;
+* Copyright (c) 2013 Alex Graul, Irene Ros;
 * Dual Licensed: MIT, GPL
 * https://github.com/misoproject/dataset/blob/master/LICENSE-MIT 
 * https://github.com/misoproject/dataset/blob/master/LICENSE-GPL 
 */
+(function(global) {
 
-(function(global, _, moment) {
-
-  global.Miso = global.Miso || {};
-  
-  /**
+/**
   * Instantiates a new dataset.
   * Parameters:
-  * options - optional parameters. 
-  *   data : "Object - an actual javascript object that already contains the data",  
+  * options - optional parameters.
+  *   data : "Object - an actual javascript object that already contains the data",
   *   url : "String - url to fetch data from",
   *   sync : Set to true to be able to bind to dataset changes. False by default.
   *   jsonp : "boolean - true if this is a jsonp request",
@@ -24,17 +21,17 @@
   *   extract : "function to apply to JSON before internal interpretation, optional"
   *   ready : the callback function to act on once the data is fetched. Isn't reuired for local imports
   *           but is required for remote url fetching.
-  *   columns: A way to manually override column type detection. Expects an array of 
-  *            objects of the following structure: 
-  *           { name : 'columnname', type: 'columntype', 
+  *   columns: A way to manually override column type detection. Expects an array of
+  *            objects of the following structure:
+  *           { name : 'columnname', type: 'columntype',
   *             ... (additional params required for type here.) }
   *   comparator : function (optional) - takes two rows and returns 1, 0, or -1  if row1 is
-  *     before, equal or after row2. 
+  *     before, equal or after row2.
   *   deferred : by default we use underscore.deferred, but if you want to pass your own (like jquery's) just
   *              pass it here.
-  *   importer : The classname of any importer (passes through auto detection based on parameters. 
+  *   importer : The classname of any importer (passes through auto detection based on parameters.
   *              For example: <code>Miso.Importers.Polling</code>.
-  *   parser   : The classname of any parser (passes through auto detection based on parameters. 
+  *   parser   : The classname of any parser (passes through auto detection based on parameters.
   *              For example: <code>Miso.Parsers.Delimited</code>.
   *   resetOnFetch : set to true if any subsequent fetches after first one should overwrite the
   *                  current data.
@@ -42,22 +39,24 @@
   *   interval : Polling interval. Set to any value in milliseconds to enable polling on a url.
   }
   */
+  global.Miso = global.Miso || {};
   global.Miso.Dataset = function(options) {
+    
+    options = options || {};
+
     this.length = 0;
     
     this._columns = [];
     this._columnPositionByName = {};
     this._computedColumns = [];
     
-    if (typeof options !== "undefined") {
-      options = options || {};
-      this._initialize(options);
-    }
+    this._initialize(options);
   };
-}(this, _, moment));
+}(this));
 
 (function(global, _) {
 
+  var Miso = global.Miso || (global.Miso = {});
   var Dataset = global.Miso.Dataset;
 
   /**
@@ -217,7 +216,7 @@
       // is this a syncable dataset? if so, pull
       // required methoMiso and mark this as a syncable dataset.
       if (this.parent.syncable === true) {
-        _.extend(this, Dataset.Events);
+        _.extend(this, Miso.Events);
         this.syncable = true;
       }
 
@@ -236,7 +235,7 @@
 
       // bind to parent if syncable
       if (this.syncable) {
-        this.parent.bind("change", this._sync, this);  
+        this.parent.subscribe("change", this._sync, { context : this });  
       }
     },
 
@@ -310,8 +309,8 @@
 
       // trigger any subscribers 
       if (this.syncable) {
-        this.trigger(eventType, event);
-        this.trigger("change", event);  
+        this.publish(eventType, event);
+        this.publish("change", event);  
       }
     },
 
@@ -570,7 +569,7 @@
       return this;
     },
 
-    _add : function(row, options) {
+    _add : function(row) {
       
       // first coerce all the values appropriatly
       _.each(row, function(value, key) {
@@ -696,114 +695,52 @@
     * Parameters:
     *   options - Optional
     */    
-    sort : function(args) {
-      var options = {};
+  sort : function(args) {
+      var options = {}, cachedRows = [];
     
       //If the first param is the comparator, set it as such.
       if ( _.isFunction(args) ) {
         options.comparator = args;
       } else {
-        options = args || options;
+        options = args || {};
       }
 
       if (options.comparator) {
         this.comparator = options.comparator;
-      }
-      
-      if (_.isUndefined(this.comparator)) {
+      } else if (_.isUndefined(this.comparator)) {
         throw new Error("Cannot sort without this.comparator.");
-      } 
-
-      var count = this.length, end;
-
-      if (count === 1) {
-        // we're done. only one item, all sorted.
-        return;
       }
 
-      var swap = _.bind(function(from, to) {
-      
-        // move second row over to first
-        var row = this.rowByPosition(to);
+      // cache rows
+      var i, j, row;
+      for(i = 0; i < this.length; i++) {
+        cachedRows[i] = this._row(i);
+      }
 
-        _.each(row, function(value, column) {
-          var colPosition = this._columnPositionByName[column],
-              value2 = this._columns[colPosition].data[from];
-          this._columns[colPosition].data.splice(from, 1, value);
-          this._columns[colPosition].data.splice(to, 1, value2);
-        }, this);
-      }, this);
+      cachedRows.sort( this.comparator );
 
-      var siftDown = _.bind(function(start, end) {
-        var root = start, child;
-        while (root * 2 <= end) {
-          child = root * 2;
-          var root_node = this.rowByPosition(root);
+      // iterate through cached rows, overwriting data in columns
+      i = cachedRows.length;
+      while ( i-- ) {
+        row = cachedRows[i];
 
-          if ((child + 1 < end) && 
-              this.comparator(
-                this.rowByPosition(child), 
-                this.rowByPosition(child+1)
-              ) < 0) {
-            child++;  
-          }
+        this._rowIdByPosition[i] = row[ this.idAttribute ];
+        this._rowPositionById[ row[ this.idAttribute ] ] = i;
 
-          if (this.comparator(
-                root_node, 
-                this.rowByPosition(child)) < 0) {
-                  
-            swap(root, child);
-            root = child;
-          } else {
-            return;
-          }
-     
-        }
-          
-      }, this);
-      
-
-      // puts data in max-heap order
-      var heapify = function(count) {
-        var start = Math.round((count - 2) / 2);
-        while (start >= 0) {
-          siftDown(start, count - 1);
-          start--;
-        }  
-      };
-
-      if (count > 2) {
-        heapify(count);
-
-        end = count - 1;
-        while (end > 1) {
-          
-          swap(end, 0);
-          end--;
-          siftDown(0, end);
-
-        }
-      } else {
-        if (this.comparator(
-            this.rowByPosition(0), 
-            this.rowByPosition(1)) > 0) {
-          swap(0,1);
+        j = this._columns.length;
+        while ( j-- ) {
+          var col = this._columns[j];
+          col.data[i] = row[ col.name ];
         }
       }
 
-      // check last two rows, they seem to always be off sync.
-      if (this.comparator(
-          this.rowByPosition(this.length - 2), 
-          this.rowByPosition(this.length - 1)) > 0) {
-        swap(this.length - 1,this.length - 2);
+      if (this.syncable && !options.silent) {
+        this.publish("sort");
       }
 
-      if (this.syncable && options.silent) {
-        this.trigger("sort");
-      }
       return this;
     },
-
+   
     /**
     * Exports a version of the dataset in json format.
     * Returns:
@@ -829,6 +766,7 @@ Version 0.0.1.2
 
 (function(global, _, moment) {
 
+  var Miso = global.Miso || (global.Miso = {});
   var Dataset = global.Miso.Dataset;
 
   // take on miso dataview's prototype
@@ -847,7 +785,7 @@ Version 0.0.1.2
       // is this a syncable dataset? if so, pull
       // required methods and mark this as a syncable dataset.
       if (options.sync === true) {
-        _.extend(this, Dataset.Events);
+        _.extend(this, Miso.Events);
         this.syncable = true;
       }
 
@@ -1022,7 +960,6 @@ Version 0.0.1.2
       //Update existing values, used the pass column to match 
       //incoming data to existing rows.
       againstColumn : function(data) {
-        
         var rows = [],
             colNames = _.keys(data),   
             row,
@@ -1044,8 +981,8 @@ Version 0.0.1.2
             toAdd.push( row );
           } else {
             toUpdate.push( row );
-            var oldRow = this.rowById(this.column(this.idAttribute).data[rowIndex])[this.idAttribute];
-            this.update(oldRow, row);
+            row[this.idAttribute] = this.rowById(this.column(this.idAttribute).data[rowIndex])[this.idAttribute];
+            this.update(row);
           }
         }, this);
         if (toAdd.length > 0) {
@@ -1276,9 +1213,9 @@ Version 0.0.1.2
       }, this);
       
       if (this.syncable && !options.silent) {
-        var e = this._buildEvent(deltas, this);
-        this.trigger('add', e );
-        this.trigger('change', e );
+        var e = Dataset.Events._buildEvent(deltas, this);
+        this.publish('add', e );
+        this.publish('change', e );
       }
 
       return this;
@@ -1310,124 +1247,111 @@ Version 0.0.1.2
       }, this);
       
       if (this.syncable && (!options || !options.silent)) {
-        var ev = this._buildEvent( deltas, this );
-        this.trigger('remove', ev );
-        this.trigger('change', ev );
+        var ev = Dataset.Events._buildEvent( deltas, this );
+        this.publish('remove', ev );
+        this.publish('change', ev );
       }
     },
 
-    /**
-    * Update all rows that match the filter. Fires update and change.
-    * Parameters:
-    *   filter - row id OR filter rows to be updated
-    *   newProperties - values to be updated.
-    *   options - options. Optional
-    *     silent - set to true to prevent event triggering..
-    */    
-    update : function(filter, newProperties, options) {
+    _arrayUpdate : function(rows) {
+      var deltas = [];
+      _.each(rows, function(newRow) {
+        var delta = { old : {}, changed : {} };
+        delta[this.idAttribute] = newRow[this.idAttribute];
 
-      var newKeys, deltas = [];
+        var pos = this._rowPositionById[newRow[this.idAttribute]];
+        _.each(newRow, function(value, prop) {
+          var column = this._columns[this._columnPositionByName[prop]];
+          var type = Dataset.types[column.type];
 
-      var updateRow = _.bind(function(row, rowIndex) {
-        var c, props;
-
-        if (_.isFunction(newProperties)) {
-          props = newProperties.apply(this, [row]);
-        } else {
-          props = newProperties;
-        }
-
-        newKeys = _.keys(props);
-
-        _.each(newKeys, function(columnName) {
-
-          // check that we aren't trying to update the id column
-          if (columnName === this.idAttribute) {
+          if ((column.name === this.idAttribute) && (column.data[pos] !== value)) {
             throw "You can't update the id column";
           }
-          
-          c = this.column(columnName);
 
-          // check if we're trying to update a computed column. If so
-          // fail.
-          if (c.isComputed()) {
-            throw "You're trying to update a computed column. Those get computed!";
+          if (typeof column === "undefined") { 
+            throw "column " + prop + " not found!"; 
           }
 
-          // test if the value passes the type test
-          var Type = Dataset.types[c.type];
-          
-          if (Type) {
-            if (Type.test(props[c.name], c)) {
+          //Ensure value passes the type test
+          if (!type.test(value, column)) {
+            throw "Value is incorrect type";
+          }
 
-              // do we have a before filter on the column? If so, apply it
-              if (!_.isUndefined(c.before)) {
-                props[c.name] = c.before(props[c.name]);
+          //skip if computed column
+          if (this._computedColumns[column.name]) {
+            return;
+          }
+
+          value = type.coerce(value, column);
+
+          //Run any before filters on the column
+          if (!_.isUndefined(column.before)) {
+            value = column.before(value);
+          }
+ 
+          if (column.data[pos] !== value) {
+            delta.old[prop] = column.data[pos];
+            column.data[pos] = value;
+            delta.changed[prop] = value;
+          }
+
+
+        }, this);
+
+          // Update any computed columns
+          if (typeof this._computedColumns !== "undefined") {
+            _.each(this._computedColumns, function(column) {
+              var temprow = _.extend({}, this._row(pos)),
+                  oldValue = temprow[column.name],
+                  newValue = column.compute(temprow, pos);
+              if (oldValue !== newValue) {
+                delta.old[column.name] = oldValue;
+                column.data[pos] = newValue;
+                delta.changed[column.name] = newValue;
               }
-
-              // coerce it.
-              props[c.name] = Type.coerce(props[c.name], c);
-            } else {
-              throw("incorrect value '" + props[c.name] + 
-                    "' of type " + Dataset.typeOf(props[c.name], c) +
-                    " passed to column '" + c.name + "' with type " + c.type);  
-            }
+            }, this);
           }
-          c.data[rowIndex] = props[c.name];
-        }, this);
-        
-        // do we have any computed columns? if so we need to update
-        // the row.
-        if (typeof this._computedColumns !== "undefined") {
-          _.each(this._computedColumns, function(column) {
-
-            // compute the complete row:
-            var newrow = _.extend({}, row, props);
-            
-            var oldValue = newrow[column.name];
-            var newValue = column.compute(newrow, rowIndex);
-            // if this is actually a new value, then add it to the delta.
-            if (oldValue !== newValue) {
-              props[column.name] = newValue;
-            }
-          });
+        if ( _.keys(delta.changed).length > 0 ) {
+          deltas.push(delta);
         }
-
-        var delta = { old : row, changed : props };
-        delta[this.idAttribute] = row[this.idAttribute];
-        deltas.push(delta);
       }, this);
+      return deltas;
+    },
 
-      // do we just have a single id? array it up.
-      if (_.isString(filter)) {
-        filter = [filter];
+    _functionUpdate : function(func) {
+      var rows = [];
+      for(var i = 0; i < this.length; i++) {
+        var newRow = func(this.rowByPosition(i));
+        if (newRow !== false) {
+          rows.push( newRow );
+        }
       }
-      // do we have an array of ids instead of filter functions?
-      if (_.isArray(filter)) {
-        var row, rowIndex;
-        _.each(filter, function(rowId) {
-          row = this.rowById(rowId);
-          rowIndex = this._rowPositionById[rowId];
-          
-          updateRow(row, rowIndex);
-        });
+      return this._arrayUpdate(rows);
+    },
 
+    /**
+    * Update can be used on one of three ways.
+    * 1: To update specific rows by passing in an object with the _id
+    * 2: To update a number of rows by passing in an array of objects with _ids
+    * 3: To update a number of row by passing in a function which will be applied to
+    * all rows.
+    * */    
+    update : function( rowsOrFunction, options ) {
+      var deltas;
+
+      if ( _.isFunction(rowsOrFunction) ) {
+        deltas = this._functionUpdate(rowsOrFunction);
       } else {
-
-        // make a filter function.
-        filter = this._rowFilter(filter);
-
-        this.each(function(row, rowIndex) {
-          if (filter(row)) {
-            updateRow(row, rowIndex);
-          }
-        }, this);
+        var rows = _.isArray(rowsOrFunction) ? rowsOrFunction : [rowsOrFunction];
+        deltas = this._arrayUpdate(rows);
       }
 
+      //computer column updates
+      //update triggers
       if (this.syncable && (!options || !options.silent)) {
-        var ev = this._buildEvent( deltas, this );
-        this.trigger('update', ev );
-        this.trigger('change', ev );
+        var ev = Dataset.Events._buildEvent( deltas, this );
+        this.publish('update', ev );
+        this.publish('change', ev );
       }
       return this;
     },
@@ -1445,7 +1369,7 @@ Version 0.0.1.2
       });
       this.length = 0;
       if (this.syncable && (!options || !options.silent)) {
-        this.trigger("reset");
+        this.publish("reset");
       }
     }
 
@@ -1485,7 +1409,7 @@ Version 0.0.1.2
         }
         return v;
       },
-      test : function(v) {
+      test : function() {
         return true;
       },
       compare : function(s1, s2) {
@@ -1648,7 +1572,7 @@ Version 0.0.1.2
         // if string, then parse as a time
         if (_.isString(v)) {
           var format = options.format || this.format;
-          return moment(v, options.format);   
+          return moment(v, format);   
         } else if (_.isNumber(v)) {
           return moment(v);
         } else {
@@ -1763,86 +1687,11 @@ Version 0.0.1.2
   //Event Related Methods
   Dataset.Events = {};
 
-  /**
-  * Bind callbacks to dataset events
-  * Parameters:
-  *   ev - name of the event
-  *   callback - callback function
-  *   context - context for the callback. optional.
-  * Returns 
-  *   object being bound to.
-  */
-  Dataset.Events.bind = function (ev, callback, context) {
-    var calls = this._callbacks || (this._callbacks = {});
-    var list  = calls[ev] || (calls[ev] = {});
-    var tail = list.tail || (list.tail = list.next = {});
-    tail.callback = callback;
-    tail.context = context;
-    list.tail = tail.next = {};
-    return this;
-  };
-
-  /**
-  * Remove one or many callbacks. If `callback` is null, removes all
-  * callbacks for the event. If `ev` is null, removes all bound callbacks
-  * for all events.
-  * Parameters:
-  *   ev - event name
-  *   callback - Optional. callback function to be removed
-  * Returns:
-  *   The object being unbound from.
-  */
-  Dataset.Events.unbind = function(ev, callback) {
-    var calls, node, prev;
-    if (!ev) {
-      this._callbacks = null;
-    } else if (calls = this._callbacks) {
-      if (!callback) {
-        calls[ev] = {};
-      } else if (node = calls[ev]) {
-        while ((prev = node) && (node = node.next)) {
-          if (node.callback !== callback) { 
-            continue;
-          }
-          prev.next = node.next;
-          node.context = node.callback = null;
-          break;
-        }
-      }
-    }
-    return this;
-  };
-
-  /**
-  * trigger a given event
-  * Parameters:
-  *   eventName - name of event
-  * Returns;
-  *   object being triggered on.
-  */
-  Dataset.Events.trigger = function(eventName) {
-    var node, calls, callback, args, ev, events = ['all', eventName];
-    if (!(calls = this._callbacks)) {
-      return this;
-    }
-    while (ev = events.pop()) {
-      if (!(node = calls[ev])) {
-        continue;
-      }
-      args = ev === 'all' ? arguments : Array.prototype.slice.call(arguments, 1);
-      while (node = node.next) {
-        if (callback = node.callback) {
-          callback.apply(node.context || this, args);
-        }
-      }
-    }
-    return this;
-  };
-
   // Used to build event objects accross the application.
   Dataset.Events._buildEvent = function(delta, dataset) {
     return new Dataset.Event(delta, dataset);
   };
+
 }(this, _));
 
 (function(global, _) {
@@ -1979,6 +1828,7 @@ Version 0.0.1.2
 
 (function(global, _) {
 
+  var Miso = global.Miso || (global.Miso = {});
   var Dataset = global.Miso.Dataset;
 
   /**
@@ -2015,7 +1865,7 @@ Version 0.0.1.2
     return this;
   };
 
-  _.extend(Dataset.Product.prototype, Dataset.Events, {
+  _.extend(Dataset.Product.prototype, Miso.Events, {
 
     /**
     * return the raw value of the product
@@ -2073,14 +1923,14 @@ Version 0.0.1.2
             var delta = this._buildDelta(this.value, producer.call(_self));
             this.value = delta.changed;
             if (_self.syncable) {
-              var event = this._buildEvent(delta, this);
+              var event = Dataset.Events._buildEvent(delta, this);
               if (!_.isUndefined(delta.old) && !options.silent && delta.old !== delta.changed) {
-                this.trigger("change", event);
+                this.publish("change", event);
               }
             }
           }
         });
-        this.bind("change", prod._sync, prod); 
+        this.subscribe("change", prod._sync, { context : prod }); 
         return prod; 
 
       } else {
@@ -2178,350 +2028,6 @@ Version 0.0.1.2
       return _.mean(vals);   
     })
 
-  });
-
-}(this, _));
-
-
-(function(global, _) {
-
-  var Dataset = global.Miso.Dataset;
-
-  /**
-  * A Miso.Derived dataset is a regular dataset that has been derived
-  * through some computation from a parent dataset. It behaves just like 
-  * a regular dataset except it also maintains a reference to its parent
-  * and the method that computed it.
-  * Parameters:
-  *   options
-  *     parent - the parent dataset
-  *     method - the method by which this derived dataset was computed
-  * Returns
-  *   a derived dataset instance
-  */
-
-  Dataset.Derived = function(options) {
-    options = options || {};
-
-    Dataset.call(this);
-    
-    // save parent dataset reference
-    this.parent = options.parent;
-
-    // the id column in a derived dataset is always _id
-    // since there might not be a 1-1 mapping to each row
-    // but could be a 1-* mapping at which point a new id 
-    // is needed.
-    this.idAttribute = "_id";
-    
-    // save the method we apply to bins.
-    this.method = options.method;
-
-    this._addIdColumn();
-
-    this.addColumn({
-      name : "_oids",
-      type : "mixed"
-    });
-
-    if (this.parent.syncable) {
-      _.extend(this, Dataset.Events);
-      this.syncable = true;
-      this.parent.bind("change", this._sync, this);  
-    }
-  };
-
-  // take in dataset's prototype.
-  Dataset.Derived.prototype = new Dataset();
-
-  // inherit all of dataset's methods.
-  _.extend(Dataset.Derived.prototype, {
-    _sync : function(event) {
-      // recompute the function on an event.
-      // TODO: would be nice to be more clever about this at some point.
-      this.func.call(this.args);
-      this.trigger("change");
-    }
-  });
-
-
-  // add derived methods to dataview (and thus dataset & derived)
-  _.extend(Dataset.DataView.prototype, {
-
-    /**
-    * moving average
-    * Parameters:
-    *   column - The column on which to calculate the average
-    *   size - The window size to utilize for the moving average
-    *   options
-    *     method - the method to apply to all values in a window. Mean by default.
-    * Returns:
-    *   a miso.derived dataset instance
-    */
-    movingAverage : function(columns, size, options) {
-      
-      options = options || {};
-
-      var d = new Dataset.Derived({
-        parent : this,
-        method : options.method || _.mean,
-        size : size,
-        args : arguments
-      });
-
-      // copy over all columns
-      this.eachColumn(function(columnName) {
-        
-        // don't try to compute a moving average on the id column.
-        if (columnName === this.idAttribute) {
-          throw "You can't compute a moving average on the id column";
-        }
-
-        d.addColumn({
-          name : columnName, type : this.column(columnName).type, data : []
-        });
-      }, this);
-
-      // save column positions on new dataset.
-      Dataset.Builder.cacheColumns(d);
-
-      // apply with the arguments columns, size, method
-      var computeMovingAverage = function() {
-        var win = [];
-
-        // normalize columns arg - if single string, to array it.
-        if (typeof columns === "string") {
-          columns = [columns];
-        }
-
-        // copy the ids
-        this.column(this.idAttribute).data = this.parent
-          .column(this.parent.idAttribute)
-          .data.slice(size-1, this.parent.length);
-
-        // copy the columns we are NOT combining minus the sliced size.
-        this.eachColumn(function(columnName, column, i) {
-          if (columns.indexOf(columnName) === -1 && columnName !== "_oids") {
-            // copy data
-            column.data = this.parent.column(columnName).data.slice(size-1, this.parent.length);
-          } else {
-            // compute moving average for each column and set that as the data 
-            column.data = _.movingAvg(this.parent.column(columnName).data, size, this.method);
-          }
-        }, this);
-
-        this.length = this.parent.length - size + 1;
-        
-        // generate oids for the oid col
-        var oidcol = this.column("_oids");
-        oidcol.data = [];
-        for(var i = 0; i < this.length; i++) {
-          oidcol.data.push(this.parent.column(this.parent.idAttribute).data.slice(i, i+size));
-        }
-        
-        Dataset.Builder.cacheRows(this);
-        
-        return this;
-      };
-
-      d.func = _.bind(computeMovingAverage, d);
-      return d.func.call(d.args);
-    },
-
-    /**
-    * Group rows by the column passed and return a column with the
-    * counts of the instance of each value in the column passed.
-    */
-    countBy : function(byColumn, options) {
-
-      options = options || {};
-      var d = new Dataset.Derived({
-        parent : this,
-        method : _.sum,
-        args : arguments
-      });
-
-      var parentByColumn = this.column(byColumn);
-      //add columns
-      d.addColumn({
-        name : byColumn,
-        type : parentByColumn.type
-      });
-
-      d.addColumn({ name : 'count', type : 'number' });
-      d.addColumn({ name : '_oids', type : 'mixed' });
-      Dataset.Builder.cacheColumns(d);
-
-      var names = d.column(byColumn).data, 
-          values = d.column('count').data, 
-          _oids = d.column('_oids').data,
-          _ids = d.column(d.idAttribute).data;
-
-      function findIndex(names, datum, type) {
-        var i;
-        for(i = 0; i < names.length; i++) {
-          if (Dataset.types[type].compare(names[i], datum) === 0) {
-            return i;
-          }
-        }
-        return -1;
-      }
-
-      this.each(function(row) {
-        var index = findIndex(names, row[byColumn], parentByColumn.type);
-        if ( index === -1 ) {
-          names.push( row[byColumn] );
-          _ids.push( _.uniqueId() );
-          values.push( 1 );
-          _oids.push( [row[this.parent.idAttribute]] );
-        } else {
-          values[index] += 1;
-          _oids[index].push( row[this.parent.idAttribute]); 
-        }
-      }, d);
-
-      Dataset.Builder.cacheRows(d);
-      return d;
-    },
-
-    /**
-    * group rows by values in a given column
-    * Parameters:
-    *   byColumn - The column by which rows will be grouped (string)
-    *   columns - The columns to be included (string array of column names)
-    *   options 
-    *     method - function to be applied, default is sum
-    *     preprocess - specify a normalization function for the
-    *                  byColumn values if you need to group by some kind of 
-    *                  derivation of those values that are not just equality based.
-    * Returns:
-    *   a miso.derived dataset instance
-    */
-    groupBy : function(byColumn, columns, options) {
-      
-      options = options || {};
-
-      var d = new Dataset.Derived({
-
-        // save a reference to parent dataset
-        parent : this,
-        
-        // default method is addition
-        method : options.method || _.sum,
-
-        // save current arguments
-        args : arguments
-      });
-
-      if (options && options.preprocess) {
-        d.preprocess = options.preprocess;  
-      }
-
-      // copy columns we want - just types and names. No data.
-      var newCols = _.union([byColumn], columns);
-      
-      _.each(newCols, function(columnName) {
-
-        this.addColumn({
-          name : columnName,
-          type : this.parent.column(columnName).type
-        });
-      }, d);
-
-      // save column positions on new dataset.
-      Dataset.Builder.cacheColumns(d);
-
-      // will get called with all the arguments passed to this
-      // host function
-      var computeGroupBy = function() {
-
-        var self = this;
-
-        // clear row cache if it exists
-        Dataset.Builder.clearRowCache(this);
-
-        // a cache of values
-        var categoryPositions = {},
-            categoryCount     = 0,
-            byColumnPosition  = this._columnPositionByName[byColumn],
-            originalByColumn = this.parent.column(byColumn);
-
-        // bin all values by their
-        for(var i = 0; i < this.parent.length; i++) {
-          var category = null;
-          
-          // compute category. If a pre-processing function was specified
-          // (for binning time for example,) run that first.
-          if (this.preprocess) {
-            category = this.preprocess(originalByColumn.data[i]);
-          } else {
-            category = originalByColumn.data[i];  
-          }
-           
-          if (_.isUndefined(categoryPositions[category])) {
-              
-            // this is a new value, we haven't seen yet so cache
-            // its position for lookup of row vals
-            categoryPositions[category] = categoryCount;
-
-            // add an empty array to all columns at that position to
-            // bin the values
-            _.each(columns, function(columnToGroup) {
-              var column = this.column(columnToGroup);
-              var idCol  = this.column(this.idAttribute);
-              column.data[categoryCount] = [];
-              idCol.data[categoryCount] = _.uniqueId();
-            }, this);
-
-            // add the actual bin number to the right col
-            this.column(byColumn).data[categoryCount] = category;
-
-            categoryCount++;
-          }
-
-          _.each(columns, function(columnToGroup) {
-            
-            var column = this.column(columnToGroup),
-                value  = this.parent.column(columnToGroup).data[i],
-                binPosition = categoryPositions[category];
-
-            column.data[binPosition].push(this.parent.rowByPosition(i));
-          }, this);
-        }
-
-        // now iterate over all the bins and combine their
-        // values using the supplied method. 
-        var oidcol = this._columns[this._columnPositionByName._oids];
-        oidcol.data = [];
-
-        _.each(columns, function(colName) {
-          var column = this.column(colName);
-
-          _.each(column.data, function(bin, binPos) {
-            if (_.isArray(bin)) {
-              
-              // save the original ids that created this group by?
-              oidcol.data[binPos] = oidcol.data[binPos] || [];
-              oidcol.data[binPos].push(_.map(bin, function(row) { return row[self.parent.idAttribute]; }));
-              oidcol.data[binPos] = _.flatten(oidcol.data[binPos]);
-
-              // compute the final value.
-              column.data[binPos] = this.method(_.map(bin, function(row) { return row[colName]; }));
-              this.length++;
-            }
-          }, this);
-
-        }, this);
-
-        Dataset.Builder.cacheRows(this);
-        return this;
-      };
-      
-      // bind the recomputation function to the dataset as the context.
-      d.func = _.bind(computeGroupBy, d);
-
-      return d.func.call(d.args);
-    }
   });
 
 }(this, _));
@@ -3161,7 +2667,7 @@ Version 0.0.1.2
         var positionRegex = /([A-Z]+)(\d+)/,
             columnPositions = {};
 
-        _.each(data.feed.entry, function(cell, index) {
+        _.each(data.feed.entry, function(cell) {
 
           var parts = positionRegex.exec(cell.title.$t),
           column = parts[1],
@@ -3457,5 +2963,346 @@ Version 0.0.1.2
 
   });
 
+
+}(this, _));
+
+(function(global, _) {
+
+  var Miso = global.Miso || (global.Miso = {});
+  var Dataset = Miso.Dataset;
+
+  /**
+  * A Miso.Derived dataset is a regular dataset that has been derived
+  * through some computation from a parent dataset. It behaves just like 
+  * a regular dataset except it also maintains a reference to its parent
+  * and the method that computed it.
+  * Parameters:
+  *   options
+  *     parent - the parent dataset
+  *     method - the method by which this derived dataset was computed
+  * Returns
+  *   a derived dataset instance
+  */
+
+  Dataset.Derived = function(options) {
+    options = options || {};
+
+    Dataset.call(this);
+    
+    // save parent dataset reference
+    this.parent = options.parent;
+
+    // the id column in a derived dataset is always _id
+    // since there might not be a 1-1 mapping to each row
+    // but could be a 1-* mapping at which point a new id 
+    // is needed.
+    this.idAttribute = "_id";
+    
+    // save the method we apply to bins.
+    this.method = options.method;
+
+    this._addIdColumn();
+
+    this.addColumn({
+      name : "_oids",
+      type : "mixed"
+    });
+
+    if (this.parent.syncable) {
+      _.extend(this, Miso.Events);
+      this.syncable = true;
+      this.parent.subscribe("change", this._sync, { context : this });  
+    }
+  };
+
+  // take in dataset's prototype.
+  Dataset.Derived.prototype = new Dataset();
+
+  // inherit all of dataset's methods.
+  _.extend(Dataset.Derived.prototype, {
+    _sync : function() {
+      // recompute the function on an event.
+      // TODO: would be nice to be more clever about this at some point.
+      this.func.call(this.args);
+      this.publish("change");
+    }
+  });
+
+
+  // add derived methods to dataview (and thus dataset & derived)
+  _.extend(Dataset.DataView.prototype, {
+
+    /**
+    * moving average
+    * Parameters:
+    *   column - The column on which to calculate the average
+    *   size - The window size to utilize for the moving average
+    *   options
+    *     method - the method to apply to all values in a window. Mean by default.
+    * Returns:
+    *   a miso.derived dataset instance
+    */
+    movingAverage : function(columns, size, options) {
+      
+      options = options || {};
+
+      var d = new Dataset.Derived({
+        parent : this,
+        method : options.method || _.mean,
+        size : size,
+        args : arguments
+      });
+
+      // copy over all columns
+      this.eachColumn(function(columnName) {
+        
+        // don't try to compute a moving average on the id column.
+        if (columnName === this.idAttribute) {
+          throw "You can't compute a moving average on the id column";
+        }
+
+        d.addColumn({
+          name : columnName, type : this.column(columnName).type, data : []
+        });
+      }, this);
+
+      // save column positions on new dataset.
+      Dataset.Builder.cacheColumns(d);
+
+      // apply with the arguments columns, size, method
+      var computeMovingAverage = function() {
+
+        // normalize columns arg - if single string, to array it.
+        if (typeof columns === "string") {
+          columns = [columns];
+        }
+
+        // copy the ids
+        this.column(this.idAttribute).data = this.parent
+          .column(this.parent.idAttribute)
+          .data.slice(size-1, this.parent.length);
+
+        // copy the columns we are NOT combining minus the sliced size.
+        this.eachColumn(function(columnName, column) {
+          if (columns.indexOf(columnName) === -1 && columnName !== "_oids") {
+            // copy data
+            column.data = this.parent.column(columnName).data.slice(size-1, this.parent.length);
+          } else {
+            // compute moving average for each column and set that as the data 
+            column.data = _.movingAvg(this.parent.column(columnName).data, size, this.method);
+          }
+        }, this);
+
+        this.length = this.parent.length - size + 1;
+        
+        // generate oids for the oid col
+        var oidcol = this.column("_oids");
+        oidcol.data = [];
+        for(var i = 0; i < this.length; i++) {
+          oidcol.data.push(this.parent.column(this.parent.idAttribute).data.slice(i, i+size));
+        }
+        
+        Dataset.Builder.cacheRows(this);
+        
+        return this;
+      };
+
+      d.func = _.bind(computeMovingAverage, d);
+      return d.func.call(d.args);
+    },
+
+    /**
+    * Group rows by the column passed and return a column with the
+    * counts of the instance of each value in the column passed.
+    */
+    countBy : function(byColumn, options) {
+
+      options = options || {};
+      var d = new Dataset.Derived({
+        parent : this,
+        method : _.sum,
+        args : arguments
+      });
+
+      var parentByColumn = this.column(byColumn);
+      //add columns
+      d.addColumn({
+        name : byColumn,
+        type : parentByColumn.type
+      });
+
+      d.addColumn({ name : 'count', type : 'number' });
+      d.addColumn({ name : '_oids', type : 'mixed' });
+      Dataset.Builder.cacheColumns(d);
+
+      var names = d.column(byColumn).data, 
+          values = d.column('count').data, 
+          _oids = d.column('_oids').data,
+          _ids = d.column(d.idAttribute).data;
+
+      function findIndex(names, datum, type) {
+        var i;
+        for(i = 0; i < names.length; i++) {
+          if (Dataset.types[type].compare(names[i], datum) === 0) {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      this.each(function(row) {
+        var index = findIndex(names, row[byColumn], parentByColumn.type);
+        if ( index === -1 ) {
+          names.push( row[byColumn] );
+          _ids.push( _.uniqueId() );
+          values.push( 1 );
+          _oids.push( [row[this.parent.idAttribute]] );
+        } else {
+          values[index] += 1;
+          _oids[index].push( row[this.parent.idAttribute]); 
+        }
+      }, d);
+
+      Dataset.Builder.cacheRows(d);
+      return d;
+    },
+
+    /**
+    * group rows by values in a given column
+    * Parameters:
+    *   byColumn - The column by which rows will be grouped (string)
+    *   columns - The columns to be included (string array of column names)
+    *   options 
+    *     method - function to be applied, default is sum
+    *     preprocess - specify a normalization function for the
+    *                  byColumn values if you need to group by some kind of 
+    *                  derivation of those values that are not just equality based.
+    * Returns:
+    *   a miso.derived dataset instance
+    */
+    groupBy : function(byColumn, columns, options) {
+      
+      options = options || {};
+
+      var d = new Dataset.Derived({
+
+        // save a reference to parent dataset
+        parent : this,
+        
+        // default method is addition
+        method : options.method || _.sum,
+
+        // save current arguments
+        args : arguments
+      });
+
+      if (options && options.preprocess) {
+        d.preprocess = options.preprocess;  
+      }
+
+      // copy columns we want - just types and names. No data.
+      var newCols = _.union([byColumn], columns);
+      
+      _.each(newCols, function(columnName) {
+
+        this.addColumn({
+          name : columnName,
+          type : this.parent.column(columnName).type
+        });
+      }, d);
+
+      // save column positions on new dataset.
+      Dataset.Builder.cacheColumns(d);
+
+      // will get called with all the arguments passed to this
+      // host function
+      var computeGroupBy = function() {
+
+        var self = this;
+
+        // clear row cache if it exists
+        Dataset.Builder.clearRowCache(this);
+
+        // a cache of values
+        var categoryPositions = {},
+            categoryCount     = 0,
+            originalByColumn = this.parent.column(byColumn);
+
+        // bin all values by their
+        for(var i = 0; i < this.parent.length; i++) {
+          var category = null;
+          
+          // compute category. If a pre-processing function was specified
+          // (for binning time for example,) run that first.
+          if (this.preprocess) {
+            category = this.preprocess(originalByColumn.data[i]);
+          } else {
+            category = originalByColumn.data[i];  
+          }
+           
+          if (_.isUndefined(categoryPositions[category])) {
+              
+            // this is a new value, we haven't seen yet so cache
+            // its position for lookup of row vals
+            categoryPositions[category] = categoryCount;
+
+            // add an empty array to all columns at that position to
+            // bin the values
+            _.each(columns, function(columnToGroup) {
+              var column = this.column(columnToGroup);
+              var idCol  = this.column(this.idAttribute);
+              column.data[categoryCount] = [];
+              idCol.data[categoryCount] = _.uniqueId();
+            }, this);
+
+            // add the actual bin number to the right col
+            this.column(byColumn).data[categoryCount] = category;
+
+            categoryCount++;
+          }
+
+          _.each(columns, function(columnToGroup) {
+            
+            var column = this.column(columnToGroup),
+                binPosition = categoryPositions[category];
+
+            column.data[binPosition].push(this.parent.rowByPosition(i));
+          }, this);
+        }
+
+        // now iterate over all the bins and combine their
+        // values using the supplied method. 
+        var oidcol = this._columns[this._columnPositionByName._oids];
+        oidcol.data = [];
+
+        _.each(columns, function(colName) {
+          var column = this.column(colName);
+
+          _.each(column.data, function(bin, binPos) {
+            if (_.isArray(bin)) {
+              
+              // save the original ids that created this group by?
+              oidcol.data[binPos] = oidcol.data[binPos] || [];
+              oidcol.data[binPos].push(_.map(bin, function(row) { return row[self.parent.idAttribute]; }));
+              oidcol.data[binPos] = _.flatten(oidcol.data[binPos]);
+
+              // compute the final value.
+              column.data[binPos] = this.method(_.map(bin, function(row) { return row[colName]; }));
+              this.length++;
+            }
+          }, this);
+
+        }, this);
+
+        Dataset.Builder.cacheRows(this);
+        return this;
+      };
+      
+      // bind the recomputation function to the dataset as the context.
+      d.func = _.bind(computeGroupBy, d);
+
+      return d.func.call(d.args);
+    }
+  });
 
 }(this, _));

@@ -31,3 +31,7 @@ Hah! Funny. Nope. I didn't architect any proper apps here. Use these code sample
 
 Great. Ping me at @ireneros on twitter or irene at bocoup.com.
 I also idle in many places on irc: #bocoup, #misoproject.
+
+## Changelog
+
+06/13/2013 - updated all the libs. Extended one of the underscore examples.
